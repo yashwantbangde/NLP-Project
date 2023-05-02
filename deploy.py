@@ -5,11 +5,13 @@ from sklearn.decomposition import TruncatedSVD
 from sklearn.metrics.pairwise import cosine_similarity
 import rake_nltk as rake
 import nltk 
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
 nltk.download('stopwords')
 
 # Load data
 data = pd.read_csv('E:/NLP Project_Research Paper Recommendation/dataset.csv')
-data = data.head(30000)
+data = data.head(400)
 # Extract keywords from abstracts using RAKE
 rake_object = rake.Rake()
 keywords = []
@@ -49,20 +51,26 @@ def get_abst(name):
     return description
 
 # Define Streamlit app
-st.title('Research Paper Recommender')
+st.title('Research Paper Recommender Based on Content-Based Filtering')
 
 # Get user input
 option = st.selectbox(
     'List of Scientific Research Papers',
     data['titles'])
 
+user_abstract = st.text_input('Enter your own abstract')
+
 if st.button('Submit'):
-    # Get recommendations
-    abstr=get_abst(option)
-    recommendations = get_recommendations(abstr, data, reduced_keywords)
+    if user_abstract:
+        # Get recommendations for user input abstract
+        recommendations = get_recommendations(user_abstract, data, reduced_keywords)
+    else:
+        # Get recommendations for selected paper
+        abstr=get_abst(option)
+        recommendations = get_recommendations(abstr, data, reduced_keywords)
+        
     # Display recommendations
     st.write('Top 10 Recommendations:')
     for i, row in recommendations.iterrows():
         st.write(f'{i + 1}. {row["titles"]}')
         st.write(row['abstracts'])
-
